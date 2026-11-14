@@ -1,0 +1,44 @@
+name: Deploy Birthday Website to GitHub Pages
+
+on:
+  # যখনই main ব্রাঞ্চে কোড পুশ করা হবে, এটি স্বয়ংক্রিয়ভাবে রান করবে
+  push:
+    branches: ["main"] # যদি তোমার ডিফল্ট ব্রাঞ্চ master হয়, তবে এখানে 'master' লিখে দিও
+
+  # GitHub ড্যাশবোর্ড থেকে ম্যানুয়ালি রান করার অপশন
+  workflow_dispatch:
+
+# GitHub Pages-এর জন্য প্রয়োজনীয় পারমিশন
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# একাধিক ডিপ্লয়মেন্ট কনফ্লিক্ট এড়াতে
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact (Static HTML & Assets)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # যেহেতু index.html ফাইলিটি প্রজেক্টের রুট ফোল্ডারে আছে, তাই '.' দেওয়া হয়েছে
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        
